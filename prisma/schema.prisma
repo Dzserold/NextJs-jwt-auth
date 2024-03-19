@@ -13,7 +13,7 @@ datasource db {
   url      = env("POSTGRES_PRISMA_URL")
 }
 
-model User2 {
+model User {
   id       Int    @id @default(autoincrement())
   email    String @unique
   password String
