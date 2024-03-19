@@ -1,40 +1,19 @@
-import { redirect } from "next/navigation";
+"use client";
+import { useFormState } from "react-dom";
+import signupAction from "./signupAction";
 
 export default function Signup() {
-  async function signup(formData: FormData) {
-    "use server";
-    // Get data off form
-    const email = formData.get("email");
-    const password = formData.get("password");
-
-    // Send to our api route
-
-    const res = await fetch(
-      process.env.ROOT_URL + "/api/signup",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      }
-    );
-
-    const json = await res.json();
-    console.log(json);
-
-    // Redirect user to login page on success
-    if (res.ok) {
-      redirect("/login");
-    } else return json.error;
-  }
+  const [error, formAction] = useFormState(
+    signupAction,
+    undefined
+  );
 
   return (
     <main>
       <h1>Signup</h1>
       <form
+        action={formAction}
         className="flex flex-col max-w-sm gap-2 text-black"
-        action={signup}
       >
         <input type="text" placeholder="email" name="email" />
         <input
@@ -46,6 +25,7 @@ export default function Signup() {
           Signup
         </button>
       </form>
+      {error && <p>{error}</p>}
     </main>
   );
 }
