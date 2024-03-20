@@ -21,7 +21,6 @@ export default async function loginAction(
   });
 
   const json = await res.json();
-  console.log(json);
 
   // Set cookie
   cookies().set("Authorization", json.token, {
