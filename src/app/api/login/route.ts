@@ -2,6 +2,7 @@ import validateEmail from "@/helpers/validateEmail";
 import validatePassword from "@/helpers/validatePassword";
 import prisma from "@/lib/prisma";
 import bcrypt from "bcryptjs";
+import * as jose from "jose";
 
 export async function POST(req: Request) {
   // Extract data sent in
@@ -45,8 +46,19 @@ export async function POST(req: Request) {
     );
 
   // Create jwt token
+  const secret = new TextEncoder().encode(
+    process.env.JWT_SECRET
+  );
+  const alg = "HS256";
+
+  const jwt = await new jose.SignJWT({})
+    .setProtectedHeader({
+      alg,
+    })
+    .setExpirationTime("72h")
+    .setSubject(user.id.toString())
+    .sign(secret);
 
   // Respond jwt token
-
-  return Response.json({});
+  return Response.json({ token: jwt });
 }
