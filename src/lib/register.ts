@@ -3,10 +3,10 @@ import validatePassword from "@/helpers/validatePassword";
 import prisma from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 
-export async function POST(req: Request) {
-  // Read data off req body
-  const body = await req.json();
-  const { email, password } = body;
+export default async function register(
+  email: string,
+  password: string
+) {
   // Validate data
   if (!validateEmail(email) || !validatePassword(password))
     return Response.json(
@@ -15,6 +15,21 @@ export async function POST(req: Request) {
       },
       { status: 400 }
     );
+
+  // Check if user already registered
+  const isExist = await prisma.user.findUnique({
+    where: { email },
+  });
+
+  if (isExist)
+    return Response.json(
+      {
+        message: "Email already registered",
+      },
+      { status: 400 }
+    );
+  console.log(isExist);
+
   // Hash the password
   const hashedPass = await bcrypt.hashSync(password, 13);
 

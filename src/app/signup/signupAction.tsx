@@ -1,4 +1,6 @@
 "use server";
+
+import register from "@/lib/register";
 import { redirect } from "next/navigation";
 
 export default async function signupAction(
@@ -11,16 +13,12 @@ export default async function signupAction(
 
   // Send to our api route
 
-  const res = await fetch(process.env.ROOT_URL + "/api/signup", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ email, password }),
-  });
+  const res = await register(
+    email as string,
+    password as string
+  );
 
   const json = await res.json();
-  console.log(json);
 
   // Redirect user to login page on success
   if (res.ok) {

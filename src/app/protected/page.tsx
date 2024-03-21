@@ -1,4 +1,4 @@
-import { LogOut } from "@/lib/actions";
+import { logout } from "@/lib/actions";
 import { redirect } from "next/navigation";
 
 export default function page() {
@@ -8,7 +8,7 @@ export default function page() {
       <form
         action={async () => {
           "use server";
-          await LogOut();
+          await logout();
           redirect("/");
         }}
       >
