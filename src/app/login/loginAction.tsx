@@ -1,4 +1,5 @@
 "use server";
+import login from "@/lib/login";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -12,27 +13,12 @@ export default async function loginAction(
 
   // Send to our api route
 
-  const res = await fetch(process.env.ROOT_URL + "/api/login", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ email, password }),
-  });
+  const res = await login(email as string, password as string);
 
   const json = await res.json();
 
-  // Set cookie
-  cookies().set("Authorization", json.token, {
-    secure: true,
-    httpOnly: true,
-    expires: Date.now() + 24 * 60 * 60 * 1000 * 3, // 3 days
-    path: "/",
-    sameSite: "strict",
-  });
-
   // Redirect user to login page on success
-  if (res.ok) {
+  if (res.status === 200) {
     redirect("/protected");
   } else return json.message;
 }

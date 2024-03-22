@@ -3,14 +3,14 @@ import validatePassword from "@/helpers/validatePassword";
 import prisma from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import * as jose from "jose";
+import { cookies } from "next/headers";
 
-export async function POST(req: Request) {
-  // Extract data sent in
-  const body = await req.json();
-  const { email, password } = body;
-
+export default async function login(
+  email: string,
+  pass: string
+) {
   // Validate data
-  if (!validateEmail(email) || !validatePassword(password))
+  if (!validateEmail(email) || !validatePassword(pass))
     return Response.json(
       {
         message: "Invalid email or password",
@@ -33,7 +33,7 @@ export async function POST(req: Request) {
 
   // Compate password
   const isCorrectPassword = bcrypt.compareSync(
-    password,
+    pass,
     user.password
   );
 
@@ -46,19 +46,35 @@ export async function POST(req: Request) {
     );
 
   // Create jwt token
+  const { password, ...withoutPass } = user;
+  console.log(withoutPass);
+
   const secret = new TextEncoder().encode(
     process.env.JWT_SECRET
   );
+
   const alg = "HS256";
 
-  const jwt = await new jose.SignJWT({})
+  const jwt = await new jose.SignJWT(withoutPass)
     .setProtectedHeader({
       alg,
     })
     .setExpirationTime("72h")
-    .setSubject(user.id.toString())
     .sign(secret);
 
-  // Respond jwt token
-  return Response.json({ token: jwt });
+  // Set cookie
+  cookies().set("Authorization", jwt, {
+    secure: true,
+    httpOnly: true,
+    expires: Date.now() + 24 * 60 * 60 * 1000 * 3, // 3 days
+    path: "/",
+    sameSite: "strict",
+  });
+
+  return Response.json(
+    {
+      message: "Success",
+    },
+    { status: 200 }
+  );
 }
