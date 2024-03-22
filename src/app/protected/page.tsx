@@ -1,7 +1,9 @@
-import { logout } from "@/lib/actions";
+import { getSession, logout } from "@/lib/actions";
+
 import { redirect } from "next/navigation";
 
-export default function page() {
+export default async function page() {
+  const session = await getSession();
   return (
     <main>
       <h1>Protected</h1>
@@ -12,7 +14,14 @@ export default function page() {
           redirect("/");
         }}
       >
-        <button type="submit">Sign Out</button>
+        <button className="p-3 bg-gray-800" type="submit">
+          Sign Out
+        </button>
+        {session && (
+          <div>
+            <p>{session.email}</p> <p>{session.id}</p>
+          </div>
+        )}
       </form>
     </main>
   );
